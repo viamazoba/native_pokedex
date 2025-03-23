@@ -6,7 +6,7 @@ export const HomeScreen = () => {
 
     return (
         <View>
-            <Text>HomeScreen</Text>
+            <Text variant="displaySmall">HomeScreen</Text>
 
             <Button
                 mode="contained"
