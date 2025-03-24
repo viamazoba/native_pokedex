@@ -15,6 +15,7 @@ export const PokemonCard = ({
     return (
         <Card style={[
             styles.cardContainer,
+            { backgroundColor: pokemon.color },
         ]}>
 
             <Text style={styles.name} variant="bodyLarge" lineBreakMode="middle">
