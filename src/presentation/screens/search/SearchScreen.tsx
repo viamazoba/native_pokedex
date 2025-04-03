@@ -6,18 +6,32 @@ import { Pokemon } from '../../../domain/entities/pokemon';
 import { PokemonCard } from '../../components/pokemons/PokemonCard';
 import { useQuery } from '@tanstack/react-query';
 import { getPokemonNameWithID } from '../../../actions/pokemons';
+import { useMemo, useState } from 'react';
 
 
 export const SearchScreen = () => {
 
     const { top } = useSafeAreaInsets();
+    const [term, setTerm] = useState('');
 
     const { isLoading, data: pokemonNameList = [] } = useQuery({
         queryKey: ['pokemon', 'all'],
         queryFn: () => getPokemonNameWithID(),
     });
 
-    console.log(pokemonNameList);
+    const pokemonNameIdList = useMemo(() => {
+        if (!isNaN(Number(term))) {
+            const pokemon = pokemonNameList.find(currentPokemon => currentPokemon.id === Number(term));
+
+            return pokemon ? [pokemon] : [];
+        }
+
+        if (term.length === 0) return [];
+        if (term.length < 3) return [];
+
+        return pokemonNameList.filter(currentPokemon => currentPokemon.name.includes(term.toLowerCase()));
+
+    }, [term, pokemonNameList]);
 
     return (
         <View style={[globalTheme.globalMargin, { paddingTop: top + 10 }]}>
@@ -26,8 +40,8 @@ export const SearchScreen = () => {
                 mode="flat"
                 autoFocus
                 autoCorrect={false}
-                onChangeText={value => console.log(value)}
-                value=" "
+                onChangeText={(text: string) => setTerm(text)}
+                value={term}
             />
 
             <ActivityIndicator
