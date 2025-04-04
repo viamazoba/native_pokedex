@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getPokemonNameWithID, getPokemonsByIds } from '../../../actions/pokemons';
 import { useMemo, useState } from 'react';
 import { FullScreenLoader } from '../../components/ui/FullScreenLoader';
+import { useDebouncedValue } from '../../hooks/useDebouncedValue';
 
 
 export const SearchScreen = () => {
@@ -14,24 +15,26 @@ export const SearchScreen = () => {
     const { top } = useSafeAreaInsets();
     const [term, setTerm] = useState('');
 
+    const debouncedValue = useDebouncedValue(term);
+
     const { isLoading, data: pokemonNameList = [] } = useQuery({
         queryKey: ['pokemon', 'all'],
         queryFn: () => getPokemonNameWithID(),
     });
 
     const pokemonNameIdList = useMemo(() => {
-        if (!isNaN(Number(term))) {
-            const pokemon = pokemonNameList.find(currentPokemon => currentPokemon.id === Number(term));
+        if (!isNaN(Number(debouncedValue))) {
+            const pokemon = pokemonNameList.find(currentPokemon => currentPokemon.id === Number(debouncedValue));
 
             return pokemon ? [pokemon] : [];
         }
 
-        if (term.length === 0) return [];
-        if (term.length < 3) return [];
+        if (debouncedValue.length === 0) return [];
+        if (debouncedValue.length < 3) return [];
 
-        return pokemonNameList.filter(currentPokemon => currentPokemon.name.includes(term.toLowerCase()));
+        return pokemonNameList.filter(currentPokemon => currentPokemon.name.includes(debouncedValue.toLowerCase()));
 
-    }, [term, pokemonNameList]);
+    }, [debouncedValue, pokemonNameList]);
 
     const { isLoading: isLoadingPokemons, data: pokemons = [] } = useQuery({
         queryKey: ['pokemons', 'by', pokemonNameIdList],
